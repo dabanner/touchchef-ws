@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  websocket:
+    build: .
+    container_name: game-websocket
+    restart: unless-stopped
+    tty: true
+    networks:
+      - game_network
+
+  caddy:
+    image: caddy:2
+    container_name: game-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - game_network
+
+networks:
+  game_network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

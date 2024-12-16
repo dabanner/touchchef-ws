@@ -11,9 +11,10 @@
         }
     }
 
-    # Serve the HTML file at /web
-    handle /web* {
+    # Serve index.html at /web
+    handle /web {
         root * /var/www
+        try_files /index.html
         file_server
     }
 

@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   websocket:
     build: .
@@ -7,6 +8,8 @@ services:
     tty: true
     networks:
       - game_network
+    expose:
+      - "8080"
 
   caddy:
     image: caddy:2
@@ -17,11 +20,13 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./test-websocket.html:/var/www/test-websocket.html
+      - ./index.html:/var/www/index.html
       - caddy_data:/data
       - caddy_config:/config
     networks:
       - game_network
+    depends_on:
+      - websocket
 
 networks:
   game_network:

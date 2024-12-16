@@ -1,34 +1,24 @@
 * {
-    # Use Let's Encrypt production ACME server
     tls {
-        # Remove internal directive to use real Let's Encrypt certificates
         protocols tls1.2 tls1.3
     }
 
-    # Reverse proxy all traffic including WebSocket
-    reverse_proxy websocket:8080 {
-        header_up Host {host}
-        header_up X-Real-IP {remote_host}
+    # Handle WebSocket connections at /ws
+    handle /ws* {
+        reverse_proxy websocket:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+        }
     }
 
-    # Enable logging
+    # Serve the HTML file at /web
+    handle /web* {
+        root * /var/www
+        file_server
+    }
+
     log {
         output file /var/log/caddy/access.log
-        format console
-    }
-}
-
-* {
-    tls {
-        protocols tls1.2 tls1.3
-    }
-
-    # Serve the HTML file
-    root * /var/www
-    file_server
-
-    log {
-        output file /var/log/caddy/sockettest-access.log
         format console
     }
 }

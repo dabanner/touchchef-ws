@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Chef WebSocket Tester</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-center text-blue-600">Touch Chef WebSocket Tester</h1>
+        </header>
+        
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Message Sender</h2>
+                <textarea id="message" class="w-full h-40 p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your message here..."></textarea>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="sendMessage()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-paper-plane mr-2"></i>Send
+                    </button>
+                    <button onclick="loadCookTask()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-utensils mr-2"></i>Cook Task
+                    </button>
+                    <button onclick="loadWashTask()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-sink mr-2"></i>Wash Task
+                    </button>
+                    <button onclick="loadCutTask()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-cut mr-2"></i>Cut Task
+                    </button>
+                    <button onclick="loadUnactiveTask()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-power-off mr-2"></i>Unactive Task
+                    </button>
+                    <button onclick="loadTaskProgress()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-tasks mr-2"></i>Task Progress
+                    </button>
+                </div>
+            </section>
+            
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Message Log</h2>
+                <div id="log" class="h-96 overflow-y-auto p-4 bg-gray-100 rounded-md">
+                    <!-- Log messages will be inserted here -->
+                </div>
+            </section>
+        </main>
+        
+        <footer class="mt-8 text-center text-gray-600">
+            <p>WebSocket Status: <span id="ws-status" class="font-semibold">Disconnected</span></p>
+        </footer>
+    </div>
+
+    <script>
+        let ws;
+        
+        function connect() {
+            ws = new WebSocket('wss://websocket.chhilif.com/ws');
+            
+            ws.onopen = () => {
+                log('Connected to WebSocket server');
+                updateStatus('Connected', 'text-green-600');
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type !== "heartrate") {
+                        log('Received: ' + event.data);
+                    }
+                } catch (error) {
+                    log('Error processing message: ' + error.message);
+                }
+            };
+            
+            ws.onerror = (error) => {
+                log('WebSocket Error: ' + error);
+                updateStatus('Error', 'text-red-600');
+            };
+            
+            ws.onclose = () => {
+                log('Disconnected from WebSocket server');
+                updateStatus('Disconnected', 'text-red-600');
+                setTimeout(connect, 1000);
+            };
+        }
+        
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+                log('Sent: ' + message);
+            } else {
+                log('WebSocket not connected!');
+            }
+        }
+        
+        function loadCookTask() {
+            document.getElementById('message').value = `{
+    "type": "activeTask",
+    "from": "SM-R870-e5f6c98cf1c04295",
+    "to": "table",
+    "assignedTask": {
+        "cook": {
+            "avatar": "1",
+            "color": "#64ceeb",
+            "deviceId": "SM-R870-e5f6c98cf1c04295",
+            "name": "anas"
+        },
+        "taskId": "1",
+        "quantity": "1",
+        "workstation": "grill"
+    }
+}`;
+        }
+
+        function loadWashTask() {
+            document.getElementById('message').value = `{
+    "type": "activeTask",
+    "from": "SM-R870-e5f6c98cf1c04295",
+    "to": "table",
+    "assignedTask": {
+        "cook": {
+            "avatar": "1",
+            "color": "#64ceeb",
+            "deviceId": "SM-R870-e5f6c98cf1c04295",
+            "name": "anas"
+        },
+        "taskId": "2",
+        "quantity": "1",
+        "workstation": "sink"
+    }
+}`;
+        }
+
+        function loadCutTask() {
+            document.getElementById('message').value = `{
+    "type": "activeTask",
+    "from": "SM-R870-e5f6c98cf1c04295",
+    "to": "table",
+    "assignedTask": {
+        "cook": {
+            "avatar": "1",
+            "color": "#64ceeb",
+            "deviceId": "SM-R870-e5f6c98cf1c04295",
+            "name": "anas"
+        },
+        "taskId": "3",
+        "quantity": "1",
+        "workstation": "cutting_board"
+    }
+}`;
+        }
+
+        function loadUnactiveTask() {
+            document.getElementById('message').value = `{
+    "type": "unactiveTask",
+    "from": "SM-R870-e5f6c98cf1c04295",
+    "to": "table"
+}`;
+        }
+        
+        function loadTaskProgress() {
+            document.getElementById('message').value = `{
+    "type": "taskProgress",
+    "from": "unity",
+    "to": "angular",
+    "progressData": {
+        "playerId": "sdk_gwear_x86_64-19d0de4ecec0fcc2",
+        "taskName": "Couper le steak", 
+        "currentProgress": 1,
+        "targetProgress": 1
+    }
+}`;
+        }
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'mb-2 p-2 bg-white rounded shadow';
+            logEntry.innerHTML = `<span class="text-gray-500">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateStatus(status, className) {
+            const statusElement = document.getElementById('ws-status');
+            statusElement.textContent = status;
+            statusElement.className = className;
+        }
+        
+        // Initial connection
+        connect();
+    </script>
+</body>
+</html>
+

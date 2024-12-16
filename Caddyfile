@@ -18,3 +18,17 @@
     }
 }
 
+* {
+    tls {
+        protocols tls1.2 tls1.3
+    }
+
+    # Serve the HTML file
+    root * /var/www
+    file_server
+
+    log {
+        output file /var/log/caddy/sockettest-access.log
+        format console
+    }
+}

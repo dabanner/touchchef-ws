@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   websocket:
     build: .
@@ -21,6 +22,9 @@ services:
       - caddy_config:/config
     networks:
       - game_network
+    # Add depends_on to ensure websocket service starts first
+    depends_on:
+      - websocket
 
 networks:
   game_network:

@@ -1,3 +1,28 @@
-http://localhost {
-    reverse_proxy websocket:8080
+* {
+    # Enable HTTPS automatically through Let's Encrypt
+    tls internal
+
+    # Reverse proxy for WebSocket
+    handle {
+        reverse_proxy /ws* websocket:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            
+            # Enable WebSocket support
+            transport websocket
+        }
+    }
+
+    # Handle regular HTTP/HTTPS traffic
+    handle {
+        reverse_proxy websocket:8080
+    }
+
+    # Enable logging
+    log {
+        output file /var/log/caddy/access.log
+        format console
+    }
 }
